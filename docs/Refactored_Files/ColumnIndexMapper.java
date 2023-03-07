@@ -13,7 +13,7 @@ import java.sql.SQLException;
  *
  * @author jtremeaux
  */
-public class ColumnIndexMapper implements ResultSetMapper<Object[]> {
+private class ColumnIndexMapper implements ResultSetMapper<Object[]> {
     /**
      * An instance of ColumnIndexMapper.
      */

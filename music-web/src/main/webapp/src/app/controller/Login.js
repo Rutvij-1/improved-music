@@ -31,4 +31,8 @@ angular.module('music').controller('Login', function($rootScope, $scope, $state,
       $dialog.messageBox(title, msg, btns);
     });
   };
+
+  $scope.register = function() {
+    $state.go('register');
+  }
 });

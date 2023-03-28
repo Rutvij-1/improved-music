@@ -106,6 +106,21 @@
     <span class="glyphicon glyphicon-exclamation-sign"></span>
     No results found
   </p>
+
+  <button type="submit" class="btn btn-primary" ng-click="searchLastFM()">
+    <span class="glyphicon glyphicon-search"></span>
+    Last.fm
+  </button>
+
+  <button type="submit" class="btn btn-primary" ng-click="searchSpotify()">
+    <span class="glyphicon glyphicon-search"></span>
+    Spotify
+  </button>
+
+  <br/><br/>
+  
+  {{tracks}}
+
 </div>
 
 <div class="big-loader-container row" ng-show="!results">

@@ -7,7 +7,8 @@ import java.util.UUID;
 
 /**
  * Playlist entity.
- * A playlist is either the list of current played tracks (the "default" playlist), or a saved playlist with a name.
+ * A playlist is either the list of current played tracks (the "default"
+ * playlist), or a saved playlist with a name.
  * 
  * @author jtremeaux
  */
@@ -27,16 +28,33 @@ public class Playlist {
      */
     private String name;
 
+    private Boolean isPublic;
+
     public Playlist() {
+    }
+
+    public Playlist(Boolean isPublic) {
+        this.isPublic = isPublic;
     }
 
     public Playlist(String id) {
         this.id = id;
     }
 
+    public Playlist(String id, Boolean isPublic) {
+        this.id = id;
+        this.isPublic = isPublic;
+    }
+
     public Playlist(String id, String userId) {
         this.id = id;
         this.userId = userId;
+    }
+
+    public Playlist(String id, String userId, Boolean isPublic) {
+        this.id = id;
+        this.userId = userId;
+        this.isPublic = isPublic;
     }
 
     /**
@@ -66,6 +84,15 @@ public class Playlist {
         return userId;
     }
 
+    /**
+     * Setter of userId.
+     *
+     * @param userId userId
+     */
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public String getName() {
         return name;
     }
@@ -75,12 +102,21 @@ public class Playlist {
     }
 
     /**
-     * Setter of userId.
+     * Getter of playlist status.
      *
-     * @param userId userId
+     * @return isPublic
      */
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public Boolean getStatus() {
+        return isPublic;
+    }
+
+    /**
+     * Setter of playlist status.
+     *
+     * @param isPublic isPublic
+     */
+    public void setStatus(Boolean isPublic) {
+        this.isPublic = isPublic;
     }
 
     /**

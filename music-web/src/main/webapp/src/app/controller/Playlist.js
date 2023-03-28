@@ -53,6 +53,14 @@ angular.module('music').controller('Playlist', function($scope, $state, $statePa
     });
   };
 
+  // Make the playlist private
+  $scope.makePrivate = function() {
+  };
+
+  // Make the playlist public
+  $scope.makePublic = function() {
+  };
+
   // Update UI on track liked
   $scope.$on('track.liked', function(e, trackId, liked) {
     var track = _.findWhere($scope.playlist.tracks, { id: trackId });

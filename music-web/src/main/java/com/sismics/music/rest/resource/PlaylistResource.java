@@ -55,13 +55,18 @@ public class PlaylistResource extends BaseResource {
         Playlist playlist = new Playlist();
         playlist.setUserId(principal.getId());
         playlist.setName(name);
+        playlist.setStatus(false);
         Playlist.createPlaylist(playlist);
+
+        // System.out.println("RANDI COURSE");
+        // System.out.println((playlist.getStatus()) ? 1 : 0);
 
         // Output the playlist
         return renderJson(Json.createObjectBuilder()
                 .add("item", Json.createObjectBuilder()
                         .add("id", playlist.getId())
                         .add("name", playlist.getName())
+                        .add("isPublic", playlist.getStatus())
                         .add("trackCount", 0)
                         .add("userTrackPlayCount", 0)
                         .build()));
@@ -106,9 +111,9 @@ public class PlaylistResource extends BaseResource {
      * Inserts a track in the playlist.
      *
      * @param playlistId Playlist ID
-     * @param trackId Track ID
-     * @param order Insert at this order in the playlist
-     * @param clear If true, clear the playlist
+     * @param trackId    Track ID
+     * @param order      Insert at this order in the playlist
+     * @param clear      If true, clear the playlist
      * @return Response
      */
     @PUT
@@ -160,8 +165,8 @@ public class PlaylistResource extends BaseResource {
      * Inserts tracks in the playlist.
      *
      * @param playlistId Playlist ID
-     * @param idList List of track ID
-     * @param clear If true, clear the playlist
+     * @param idList     List of track ID
+     * @param clear      If true, clear the playlist
      * @return Response
      */
     @PUT
@@ -173,7 +178,7 @@ public class PlaylistResource extends BaseResource {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
-        
+
         Validation.required(idList, "ids");
 
         // Get the playlist
@@ -193,10 +198,10 @@ public class PlaylistResource extends BaseResource {
             // Delete all tracks in the playlist
             playlistTrackDao.deleteByPlaylistId(playlist.getId());
         }
-        
+
         // Get the track order
         int order = playlistTrackDao.getPlaylistTrackNextOrder(playlist.getId());
-        
+
         for (String id : idList) {
             // Load the track
             TrackDao trackDao = new TrackDao();
@@ -204,7 +209,7 @@ public class PlaylistResource extends BaseResource {
             if (track == null) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-            
+
             // Insert the track into the playlist
             playlistTrackDao.insertPlaylistTrack(playlist.getId(), track.getId(), order++);
         }
@@ -212,12 +217,12 @@ public class PlaylistResource extends BaseResource {
         // Output the playlist
         return renderJson(buildPlaylistJson(playlist));
     }
-    
+
     /**
      * Load a named playlist into the default playlist.
      *
      * @param playlistId Playlist ID
-     * @param clear If true, clear the default playlist
+     * @param clear      If true, clear the default playlist
      * @return Response
      */
     @POST
@@ -241,7 +246,8 @@ public class PlaylistResource extends BaseResource {
         // Get the default playlist
         PlaylistDto defaultPlaylist = new PlaylistDao().getDefaultPlaylistByUserId(principal.getId());
         if (defaultPlaylist == null) {
-            throw new ServerException("UnknownError", MessageFormat.format("Default playlist not found for user {0}", principal.getId()));
+            throw new ServerException("UnknownError",
+                    MessageFormat.format("Default playlist not found for user {0}", principal.getId()));
         }
 
         PlaylistTrackDao playlistTrackDao = new PlaylistTrackDao();
@@ -282,11 +288,12 @@ public class PlaylistResource extends BaseResource {
         if (!authenticate()) {
             throw new ForbiddenClientException();
         }
-        
+
         // Get the default playlist
         PlaylistDto playlist = new PlaylistDao().getDefaultPlaylistByUserId(principal.getId());
         if (playlist == null) {
-            throw new ServerException("UnknownError", MessageFormat.format("Default playlist not found for user {0}", principal.getId()));
+            throw new ServerException("UnknownError",
+                    MessageFormat.format("Default playlist not found for user {0}", principal.getId()));
         }
 
         PlaylistTrackDao playlistTrackDao = new PlaylistTrackDao();
@@ -294,20 +301,20 @@ public class PlaylistResource extends BaseResource {
             // Delete all tracks in the playlist
             playlistTrackDao.deleteByPlaylistId(playlist.getId());
         }
-        
+
         // Get the track order
         int order = playlistTrackDao.getPlaylistTrackNextOrder(playlist.getId());
-        
+
         // TODO Add prefered tracks
         // Add random tracks
         PaginatedList<TrackDto> paginatedList = PaginatedLists.create();
         new TrackDao().findByCriteria(paginatedList, new TrackCriteria().setRandom(true), null, null);
-        
+
         for (TrackDto trackDto : paginatedList.getResultList()) {
             // Insert the track into the playlist
             playlistTrackDao.insertPlaylistTrack(playlist.getId(), trackDto.getId(), order++);
         }
-        
+
         // Output the playlist
         return renderJson(buildPlaylistJson(playlist));
     }
@@ -316,8 +323,8 @@ public class PlaylistResource extends BaseResource {
      * Move the track to another position in the playlist.
      *
      * @param playlistId Playlist ID
-     * @param order Current track order in the playlist
-     * @param newOrder New track order in the playlist
+     * @param order      Current track order in the playlist
+     * @param newOrder   New track order in the playlist
      * @return Response
      */
     @POST
@@ -363,7 +370,7 @@ public class PlaylistResource extends BaseResource {
      * Remove a track from the playlist.
      *
      * @param playlistId Playlist ID
-     * @param order Current track order in the playlist
+     * @param order      Current track order in the playlist
      * @return Response
      */
     @DELETE
@@ -470,6 +477,49 @@ public class PlaylistResource extends BaseResource {
     }
 
     /**
+     * Returns all public playlists.
+     *
+     * @return Response
+     */
+    @GET
+    @Path("public")
+    public Response listPublicPlaylists(
+            @QueryParam("limit") Integer limit,
+            @QueryParam("offset") Integer offset,
+            @QueryParam("sort_column") Integer sortColumn,
+            @QueryParam("asc") Boolean asc) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+        // Get the playlists
+        PaginatedList<PlaylistDto> paginatedList = PaginatedLists.create(limit, offset);
+        SortCriteria sortCriteria = new SortCriteria(sortColumn, asc);
+        new PlaylistDao().findByCriteria(paginatedList, new PlaylistCriteria()
+                .setDefaultPlaylist(false)
+                .setStatus(false), sortCriteria, null);
+        // new PlaylistDao().findByCriteria(paginatedList, new PlaylistCriteria()
+        // .setDefaultPlaylist(false), sortCriteria, null);
+
+        // Output the list
+        JsonObjectBuilder response = Json.createObjectBuilder();
+        JsonArrayBuilder items = Json.createArrayBuilder();
+        for (PlaylistDto playlist : paginatedList.getResultList()) {
+            items.add(Json.createObjectBuilder()
+                    .add("id", playlist.getId())
+                    .add("name", playlist.getName())
+                    .add("isPublic", playlist.getStatus())
+                    .add("trackCount", playlist.getPlaylistTrackCount())
+                    .add("userTrackPlayCount", playlist.getUserTrackPlayCount()));
+        }
+
+        response.add("total", paginatedList.getResultCount());
+        response.add("items", items);
+
+        return renderJson(response);
+    }
+
+    /**
      * Returns all tracks in the playlist.
      *
      * @return Response
@@ -530,7 +580,7 @@ public class PlaylistResource extends BaseResource {
         // Always return OK
         return okJson();
     }
-    
+
     /**
      * Build the JSON output of a playlist.
      * 
@@ -562,7 +612,7 @@ public class PlaylistResource extends BaseResource {
                     .add("artist", Json.createObjectBuilder()
                             .add("id", trackDto.getArtistId())
                             .add("name", trackDto.getArtistName()))
-                    
+
                     .add("album", Json.createObjectBuilder()
                             .add("id", trackDto.getAlbumId())
                             .add("name", trackDto.getAlbumName())

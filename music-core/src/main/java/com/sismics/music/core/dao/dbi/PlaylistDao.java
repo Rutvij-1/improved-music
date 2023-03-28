@@ -10,6 +10,7 @@ import com.sismics.util.context.ThreadLocalContext;
 import com.sismics.util.dbi.BaseDao;
 import com.sismics.util.dbi.filter.FilterCriteria;
 import org.skife.jdbi.v2.Handle;
+import org.skife.jdbi.v2.Update;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,11 +30,12 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
 
         StringBuilder sb = new StringBuilder("select p.id as id, p.name as c0,")
                 .append("  p.user_id as userId,")
+                .append("  p.ispublic as isPublic,")
                 .append("  count(pt.id) as c1,")
                 .append("  sum(utr.playcount) as c2")
                 .append("  from t_playlist p")
-                .append("  left join t_playlist_track pt on(pt.playlist_id = p.id)")
-                .append("  left join t_user_track utr on(utr.track_id = pt.track_id)");
+                .append("  full outer join t_playlist_track pt on(pt.playlist_id = p.id)")
+                .append("  full outer join t_user_track utr on(utr.track_id = pt.track_id)");
 
         // Adds search criteria
         if (criteria.getId() != null) {
@@ -55,8 +57,16 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
             criteriaList.add("lower(p.name) like lower(:nameLike)");
             parameterMap.put("nameLike", "%" + criteria.getNameLike() + "%");
         }
+        if (criteria.getStatus() != null) {
+            if (criteria.getStatus()) {
+                criteriaList.add("p.isPublic = 1");
+            } else {
+                criteriaList.add("p.isPublic = 0");
+            }
+        }
 
-        return new QueryParam(sb.toString(), criteriaList, parameterMap, null, filterCriteria, Lists.newArrayList("p.id"), new PlaylistMapper());
+        return new QueryParam(sb.toString(), criteriaList, parameterMap, null, filterCriteria,
+                Lists.newArrayList("p.id"), new PlaylistMapper());
     }
 
     /**
@@ -68,12 +78,21 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
     public String create(Playlist playlist) {
         final Handle handle = ThreadLocalContext.get().getHandle();
         handle.createStatement("insert into " +
-                "  t_playlist(id, user_id, name)" +
-                "  values(:id, :userId, :name)")
+                " t_playlist(id, user_id, name, ispublic)" +
+                " values(:id, :userId, :name, :isPublic)")
                 .bind("id", playlist.getId())
                 .bind("userId", playlist.getUserId())
                 .bind("name", playlist.getName())
+                .bind("isPublic", (playlist.getStatus()) ? 1 : 0)
                 .execute();
+
+        // handle.createStatement("insert into " +
+        // " t_playlist(id, user_id, name)" +
+        // " values(:id, :userId, :name)")
+        // .bind("id", playlist.getId())
+        // .bind("userId", playlist.getUserId())
+        // .bind("name", playlist.getName())
+        // .execute();
 
         return playlist.getId();
     }

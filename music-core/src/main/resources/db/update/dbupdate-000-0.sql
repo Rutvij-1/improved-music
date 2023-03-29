@@ -78,7 +78,6 @@ create cached table T_PLAYLIST (
    ID varchar (36) not null,
    USER_ID varchar (36) not null,
    NAME varchar (200) null,
-   ISPUBLIC NUMBER(1) not null,
    constraint PK_T_PLAYLIST primary key (ID)
 );
 

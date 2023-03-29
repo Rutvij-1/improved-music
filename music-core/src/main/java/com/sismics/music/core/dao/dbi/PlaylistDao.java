@@ -34,8 +34,8 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
                 .append("  count(pt.id) as c1,")
                 .append("  sum(utr.playcount) as c2")
                 .append("  from t_playlist p")
-                .append("  full outer join t_playlist_track pt on(pt.playlist_id = p.id)")
-                .append("  full outer join t_user_track utr on(utr.track_id = pt.track_id)");
+                .append("  left join t_playlist_track pt on(pt.playlist_id = p.id)")
+                .append("  left join t_user_track utr on(utr.track_id = pt.track_id)");
 
         // Adds search criteria
         if (criteria.getId() != null) {
@@ -85,15 +85,6 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
                 .bind("name", playlist.getName())
                 .bind("isPublic", (playlist.getStatus()) ? 1 : 0)
                 .execute();
-
-        // handle.createStatement("insert into " +
-        // " t_playlist(id, user_id, name)" +
-        // " values(:id, :userId, :name)")
-        // .bind("id", playlist.getId())
-        // .bind("userId", playlist.getUserId())
-        // .bind("name", playlist.getName())
-        // .execute();
-
         return playlist.getId();
     }
 

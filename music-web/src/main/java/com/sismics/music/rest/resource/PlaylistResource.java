@@ -92,7 +92,7 @@ public class PlaylistResource extends BaseResource {
 
         // Get the playlist
         PlaylistDto playlistDto = new PlaylistDao().findFirstByCriteria(new PlaylistCriteria()
-                .setUserId(principal.getId())
+                // .setUserId(principal.getId())
                 .setDefaultPlaylist(false)
                 .setId(playlistId));
         notFoundIfNull(playlistDto, "Playlist: " + playlistId);
@@ -100,11 +100,44 @@ public class PlaylistResource extends BaseResource {
         // Update the playlist
         Playlist playlist = new Playlist(playlistDto.getId());
         playlist.setName(name);
+        playlist.setStatus(playlistDto.getStatus());
         Playlist.updatePlaylist(playlist);
 
         // Output the playlist
         return Response.ok()
                 .build();
+    }
+
+    /**
+     * Toggle the status of a named playlist.
+     *
+     * @return Response
+     */
+    @POST
+    @Path("status/{id: [a-z0-9\\-]+}")
+    public Response togglePlaylistStatus(
+            @PathParam("id") String playlistId) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+        Validation.required(playlistId, "id");
+
+        // Get the playlist
+        PlaylistDto playlistDto = new PlaylistDao().findFirstByCriteria(new PlaylistCriteria()
+                // .setUserId(principal.getId())
+                .setId(playlistId));
+        notFoundIfNull(playlistDto, "Playlist: " + playlistId);
+
+        // Update the playlist
+        Playlist playlist = new Playlist(playlistDto.getId());
+        playlist.setName(playlistDto.getName());
+        playlist.setStatus(!playlistDto.getStatus());
+        Playlist.updatePlaylist(playlist);
+
+        playlistDto.setStatus(!playlistDto.getStatus());
+
+        return renderJson(buildPlaylistJson(playlistDto));
     }
 
     /**
@@ -132,13 +165,12 @@ public class PlaylistResource extends BaseResource {
         notFoundIfNull(track, "Track: " + trackId);
 
         // Get the playlist
-        PlaylistCriteria criteria = new PlaylistCriteria()
-                .setUserId(principal.getId());
+        PlaylistCriteria criteria = new PlaylistCriteria().setId(playlistId);
+        ;
         if (DEFAULt_playlist.equals(playlistId)) {
             criteria.setDefaultPlaylist(true);
         } else {
             criteria.setDefaultPlaylist(false);
-            criteria.setId(playlistId);
         }
         PlaylistDto playlist = new PlaylistDao().findFirstByCriteria(criteria);
         notFoundIfNull(playlist, "Playlist: " + playlistId);
@@ -182,13 +214,12 @@ public class PlaylistResource extends BaseResource {
         Validation.required(idList, "ids");
 
         // Get the playlist
-        PlaylistCriteria criteria = new PlaylistCriteria()
-                .setUserId(principal.getId());
+        PlaylistCriteria criteria = new PlaylistCriteria().setId(playlistId);
+        ;
         if (DEFAULt_playlist.equals(playlistId)) {
             criteria.setDefaultPlaylist(true);
         } else {
             criteria.setDefaultPlaylist(false);
-            criteria.setId(playlistId);
         }
         PlaylistDto playlist = new PlaylistDao().findFirstByCriteria(criteria);
         notFoundIfNull(playlist, "Playlist: " + playlistId);
@@ -230,15 +261,15 @@ public class PlaylistResource extends BaseResource {
     public Response loadPlaylist(
             @PathParam("id") String playlistId,
             @FormParam("clear") Boolean clear) {
-        if (!authenticate()) {
-            throw new ForbiddenClientException();
-        }
+        // if (!authenticate()) {
+        // throw new ForbiddenClientException();
+        // }
 
         Validation.required(playlistId, "id");
 
         // Get the named playlist
         PlaylistDto namedPlaylist = new PlaylistDao().findFirstByCriteria(new PlaylistCriteria()
-                .setUserId(principal.getId())
+                // .setUserId(principal.getId())
                 .setDefaultPlaylist(false)
                 .setId(playlistId));
         notFoundIfNull(namedPlaylist, "Playlist: " + playlistId);
@@ -341,13 +372,12 @@ public class PlaylistResource extends BaseResource {
         Validation.required(newOrder, "neworder");
 
         // Get the playlist
-        PlaylistCriteria criteria = new PlaylistCriteria()
-                .setUserId(principal.getId());
+        PlaylistCriteria criteria = new PlaylistCriteria().setId(playlistId);
+        ;
         if (DEFAULt_playlist.equals(playlistId)) {
             criteria.setDefaultPlaylist(true);
         } else {
             criteria.setDefaultPlaylist(false);
-            criteria.setId(playlistId);
         }
         PlaylistDto playlist = new PlaylistDao().findFirstByCriteria(criteria);
         notFoundIfNull(playlist, "Playlist: " + playlistId);
@@ -385,13 +415,12 @@ public class PlaylistResource extends BaseResource {
         Validation.required(order, "order");
 
         // Get the playlist
-        PlaylistCriteria criteria = new PlaylistCriteria()
-                .setUserId(principal.getId());
+        PlaylistCriteria criteria = new PlaylistCriteria().setId(playlistId);
+        ;
         if (DEFAULt_playlist.equals(playlistId)) {
             criteria.setDefaultPlaylist(true);
         } else {
             criteria.setDefaultPlaylist(false);
-            criteria.setId(playlistId);
         }
         PlaylistDto playlist = new PlaylistDao().findFirstByCriteria(criteria);
         notFoundIfNull(playlist, "Playlist: " + playlistId);
@@ -424,7 +453,7 @@ public class PlaylistResource extends BaseResource {
         // Get the playlist
         PlaylistDto playlistDto = new PlaylistDao().findFirstByCriteria(new PlaylistCriteria()
                 .setDefaultPlaylist(false)
-                .setUserId(principal.getId())
+                // .setUserId(principal.getId())
                 .setId(playlistId));
         notFoundIfNull(playlistDto, "Playlist: " + playlistId);
 
@@ -466,6 +495,7 @@ public class PlaylistResource extends BaseResource {
             items.add(Json.createObjectBuilder()
                     .add("id", playlist.getId())
                     .add("name", playlist.getName())
+                    .add("isPublic", playlist.getStatus())
                     .add("trackCount", playlist.getPlaylistTrackCount())
                     .add("userTrackPlayCount", playlist.getUserTrackPlayCount()));
         }
@@ -488,16 +518,16 @@ public class PlaylistResource extends BaseResource {
             @QueryParam("offset") Integer offset,
             @QueryParam("sort_column") Integer sortColumn,
             @QueryParam("asc") Boolean asc) {
-        if (!authenticate()) {
-            throw new ForbiddenClientException();
-        }
+        // if (!authenticate()) {
+        // throw new ForbiddenClientException();
+        // }
 
         // Get the playlists
         PaginatedList<PlaylistDto> paginatedList = PaginatedLists.create(limit, offset);
         SortCriteria sortCriteria = new SortCriteria(sortColumn, asc);
         new PlaylistDao().findByCriteria(paginatedList, new PlaylistCriteria()
                 .setDefaultPlaylist(false)
-                .setStatus(false), sortCriteria, null);
+                .setStatus(true), sortCriteria, null);
         // new PlaylistDao().findByCriteria(paginatedList, new PlaylistCriteria()
         // .setDefaultPlaylist(false), sortCriteria, null);
 
@@ -528,18 +558,17 @@ public class PlaylistResource extends BaseResource {
     @Path("{id: [a-z0-9\\-]+}")
     public Response listTrack(
             @PathParam("id") String playlistId) {
-        if (!authenticate()) {
-            throw new ForbiddenClientException();
-        }
+        // if (!authenticate()) {
+        // throw new ForbiddenClientException();
+        // }
 
         // Get the playlist
-        PlaylistCriteria criteria = new PlaylistCriteria()
-                .setUserId(principal.getId());
+        PlaylistCriteria criteria = new PlaylistCriteria().setId(playlistId);
+        ;
         if (DEFAULt_playlist.equals(playlistId)) {
             criteria.setDefaultPlaylist(true);
         } else {
             criteria.setDefaultPlaylist(false);
-            criteria.setId(playlistId);
         }
         PlaylistDto playlist = new PlaylistDao().findFirstByCriteria(criteria);
         notFoundIfNull(playlist, "Playlist: " + playlistId);
@@ -563,13 +592,12 @@ public class PlaylistResource extends BaseResource {
         }
 
         // Get the playlist
-        PlaylistCriteria criteria = new PlaylistCriteria()
-                .setUserId(principal.getId());
+        PlaylistCriteria criteria = new PlaylistCriteria().setId(playlistId);
+        ;
         if (DEFAULt_playlist.equals(playlistId)) {
             criteria.setDefaultPlaylist(true);
         } else {
             criteria.setDefaultPlaylist(false);
-            criteria.setId(playlistId);
         }
         PlaylistDto playlist = new PlaylistDao().findFirstByCriteria(criteria);
         notFoundIfNull(playlist, "Playlist: " + playlistId);
@@ -592,7 +620,7 @@ public class PlaylistResource extends BaseResource {
         JsonArrayBuilder tracks = Json.createArrayBuilder();
         TrackDao trackDao = new TrackDao();
         List<TrackDto> trackList = trackDao.findByCriteria(new TrackCriteria()
-                .setUserId(principal.getId())
+                // .setUserId(principal.getId())
                 .setPlaylistId(playlist.getId()));
         int i = 0;
         for (TrackDto trackDto : trackList) {
@@ -622,6 +650,12 @@ public class PlaylistResource extends BaseResource {
         response.add("id", playlist.getId());
         if (playlist.getName() != null) {
             response.add("name", playlist.getName());
+        }
+        if (playlist.getStatus() != null) {
+            response.add("isPublic", playlist.getStatus());
+        }
+        if (playlist.getUserId() != null) {
+            response.add("userId", playlist.getUserId());
         }
         return response;
     }

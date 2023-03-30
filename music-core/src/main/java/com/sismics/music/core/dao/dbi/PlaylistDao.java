@@ -76,6 +76,10 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
      * @return Playlist ID
      */
     public String create(Playlist playlist) {
+        System.out.println("");
+        System.out.println(playlist.getUserId());
+        System.out.println("");
+
         final Handle handle = ThreadLocalContext.get().getHandle();
         handle.createStatement("insert into " +
                 " t_playlist(id, user_id, name, ispublic)" +
@@ -97,8 +101,10 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
         final Handle handle = ThreadLocalContext.get().getHandle();
         handle.createStatement("update t_playlist" +
                 "  set name = :name" +
+                "  , ispublic = :isPublic" +
                 "  where id = :id")
                 .bind("name", playlist.getName())
+                .bind("isPublic", playlist.getStatus())
                 .bind("id", playlist.getId())
                 .execute();
     }

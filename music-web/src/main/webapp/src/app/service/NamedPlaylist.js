@@ -14,7 +14,6 @@ angular.module('music').factory('NamedPlaylist', function($rootScope, $modal, Re
         limit: 1000
       }).then(function(data) {
         $rootScope.playlists = data.items;
-        // console.log(data.items);
       });
       Restangular.one('playlist/public').get({
         limit: 1000

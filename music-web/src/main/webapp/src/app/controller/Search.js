@@ -13,8 +13,8 @@ angular
       var lastfm_api_site;
 
       var search = _.debounce(function (query) {
-        spotify_api_site = "https://api.spotify.com/v1/search?q=" + query + "&type=track&market=IN&limit=5";
-        lastfm_api_site = "https://ws.audioscrobbler.com/2.0/?method=track.search&track=" + query + "&api_key=6e04e3362ef7be553491b6556935a61b&format=json";
+        spotify_api_site = "https://api.spotify.com/v1/search?q=" + query + "&type=track&market=IN&limit=10";
+        lastfm_api_site = "https://ws.audioscrobbler.com/2.0/?method=track.search&track=" + query + "&limit=10&api_key=6e04e3362ef7be553491b6556935a61b&format=json";
         
         Restangular.one("search", query)
           .get({ limit: 100 })
@@ -26,7 +26,7 @@ angular
       
       $scope.searchSpotify = function () {
         console.log(spotify_api_site);
-        var heads = {authorization: "Bearer BQAvLNJZM2duEPtTSoaYdpEgtCeYtWgbhCED8N9IHvxSyqE_QDqakmZaG_NJNXjBQoMQ5z8zAB0uCX9BH-LP2EyBFZyK2puKcuCWgPp00YaZtzVceGsE2MN96Bxqc2PuGHHZWyBpW3W-Gtl9_bDhbSvxO0qP1sqnPc_Q7ifp49u49DW-u8A994nHDKe3hTJV_J9oWn1wHCgU1Ktm5DN1U06Zit-pFTgswxr44q2I1osO5U_fFyePr3puib23MlxOX22shSiRVl42lZSR1o7UIOKPdb_WYBaTFaQ3gWdUhvz213M_GiPa1A58myuS3EuoAS0_SrLQi1ZT2Tz27kg6AaPpGAWKqlxWZ1XuU7e8AZWjqwE"};
+        var heads = {authorization: "Bearer BQBi4AHxmdGaR-1jIYE_HqkQfWzRXksgQ1pUL0SQ5AWefkpODlEDTV3hxPkjcGY0DiK6opEysA5mjRh_hHRp3K3agPJFxBIhMNX_lvo2RTl3M2n-uXWIblMGvE95f-Q7wq2-qfxgO_UpSPPSwh02iAcpV3cprBFMaugJp52DMyxGtgJfPDBs32D18LxIHMLQreCYVFXzc1vpg3QF2zJzkJUJ7XWszV852s8FvMDu6P_VOrs7R5qoPFQr3rX8spoev2hySluGDLaxWpzGw6JukV8NR3hbYqGoC5srfQ3nzwvsagMR0QeNgCPkeyCg184ro46psCYW9i6FTPUk0BcOXxIff-Ctt3bjC3aFQ863P8q_eYI"};
         $http.get(spotify_api_site, {headers: heads}).then(
           function (data) {
             console.log(data.data.tracks.items);
@@ -43,23 +43,7 @@ angular
         $http.get(lastfm_api_site).then(
           function (data) {
             console.log(data.data.results.trackmatches.track);
-            $scope.track = data.data.results.trackmatches.track;
-          },
-          function (error) {
-            console.log(error);
-          }
-        );
-      };
-
-      $scope.recommendLastFM = function () {
-        var site = "https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=cher&track=believe&limit=10&api_key=6e04e3362ef7be553491b6556935a61b&format=json"
-        console.log(site);
-        $http.get(site).then(
-          function (data) {
-            console.log(data.data.similartracks.track);
-            $scope.track_name = data.data.similartracks.track.name;
-            $scope.artist_name = data.data.similartracks.track.artist.name;
-            $scope.duration = data.data.similartracks.track.duration;
+            $scope.tracks = data.data.results.trackmatches.track;
           },
           function (error) {
             console.log(error);

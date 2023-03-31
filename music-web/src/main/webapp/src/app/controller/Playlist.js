@@ -28,14 +28,13 @@ angular
 
         for (var i = 0; i < $scope.playlist.tracks.length; i++) {
           var site =
-            `https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=${String($scope.playlist.tracks[i].artist.name)}&track=${String($scope.playlist.tracks[i].title)}&api_key=6e04e3362ef7be553491b6556935a61b&format=json`;
+            `https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=${String($scope.playlist.tracks[i].artist.name)}&track=${String($scope.playlist.tracks[i].title)}&limit=10&api_key=6e04e3362ef7be553491b6556935a61b&format=json`;
 
           console.log(site);
 
           $http.get(site).then(
             function (data) {
-              console.log(data);
-              tracks.push(data.data.similartracks.track);
+              tracks = [...new Set([...tracks, ...(data.data.similartracks.track)])];
             },
             function (error) {
               console.log(error);
@@ -43,7 +42,13 @@ angular
           );
         }
 
-        $scope.tracks = tracks;
+        var sleep = new Promise(resolve => setTimeout(resolve, 1000));
+      
+        sleep.then(() => {
+          
+          $scope.tracks = tracks;
+          console.log(tracks);
+        });
       };
 
       // var spotify_api_site;
@@ -52,14 +57,15 @@ angular
       // spotify_api_site = "https://api.spotify.com/v1/search?q=" + query + "&type=track&market=IN&limit=5";
       // lastfm_api_site = "https://ws.audioscrobbler.com/2.0/?method=track.search&track=" + query + "&api_key=6e04e3362ef7be553491b6556935a61b&format=json";
 
+
       $scope.recommendSpotify = function () {
         var tracks = new Array();
         var rsite = "https://api.spotify.com/v1/recommendations?seed_tracks=";
+        var num = $scope.playlist.tracks.length <= 5 ? $scope.playlist.tracks.length : 5;
+        var heads = {authorization: "Bearer BQA2KdteOfgDPUjXwRvgJ3lpZ-OR2zdQhIbBeTF3mTxqqqpLEzNvgl5qPIMgkDtjMcSO4j02kDR6KbF5aX2hlXt6ve1_CcpTzcYxvlV8Mjd8eGSzjB_GzNoWwMHR1X9jR_47gFQm2HTHwdHGUU5vTN8iadCocsx0fX8YxAh16Ht88Y5giYqv26lP4klVZCJrWXmHRhicQ_VbZ7i2zowal_UAgLFQN9w3XyDfFZs8vNoT_FDeq3ByqgIfUO3-b04-P6T7uGN5x7v4gSobeJns2XxqPoSeqiltbwXn9sfS1U31Hkm9SI9ojMOADBa1e9CdBSw7iaDiW9NDWC8CujDViFIZS5BHf9-vAAE1_CsQ81hqV24"}
 
-        var heads = {authorization: "Bearer BQAvLNJZM2duEPtTSoaYdpEgtCeYtWgbhCED8N9IHvxSyqE_QDqakmZaG_NJNXjBQoMQ5z8zAB0uCX9BH-LP2EyBFZyK2puKcuCWgPp00YaZtzVceGsE2MN96Bxqc2PuGHHZWyBpW3W-Gtl9_bDhbSvxO0qP1sqnPc_Q7ifp49u49DW-u8A994nHDKe3hTJV_J9oWn1wHCgU1Ktm5DN1U06Zit-pFTgswxr44q2I1osO5U_fFyePr3puib23MlxOX22shSiRVl42lZSR1o7UIOKPdb_WYBaTFaQ3gWdUhvz213M_GiPa1A58myuS3EuoAS0_SrLQi1ZT2Tz27kg6AaPpGAWKqlxWZ1XuU7e8AZWjqwE"}
-
-        for (var i = 0; i < $scope.playlist.tracks.length; i++) {
-          var site = "https://api.spotify.com/v1/search?q=" + $scope.playlist.tracks[i].title + "&type=track&market=IN&limit=5";
+        for (var i = 0; i < num; i++) {
+          var site = "https://api.spotify.com/v1/search?q=" + $scope.playlist.tracks[i].title + "&type=track&market=IN&limit=10";
       
           console.log(site);
 
@@ -76,24 +82,27 @@ angular
 
         console.log(tracks)
 
-        
-        for(var i = 0; i < tracks.length; i++) {
-          console.log(tracks[i]);
-          rsite +=  "," + tracks[i];
-        }
-
-        // sleep(2000);
-
-        console.log(rsite);
-
-        $http.get(rsite, {headers: heads}).then(
-          function (data) {
-            console.log(data.data.track);
-          },
-          function (error) {
-            console.log(error);
+        var sleep = new Promise(resolve => setTimeout(resolve, 1000));
+      
+        sleep.then(() => {
+          for(var i = 0; i < tracks.length; i++) {
+            rsite += tracks[i] + ",";
           }
-        );
+  
+          console.log(rsite);
+  
+          $http.get(rsite, {headers: heads}).then(
+            function (data) {
+              $scope.tracks = data.data.tracks;
+              console.log(data.data.tracks);
+            },
+            function (error) {
+              console.log(error);
+            }
+          );
+        });
+
+        
 
       };
 

@@ -47,14 +47,17 @@
   </div>
 </div>
 
-<!-- <div>
-  {{ tracks }}
+<!-- <div *ngFor="for track of tracks">
+  {{ tracks.name }}
 </div> -->
 
+<h3 ng-show="tracks.length"> Recommended Songs </h3>
 <ul>
-<li *ngFor="for track of tracks">
-  {{ track.name }}
-</li>
+  <li ng-repeat="track in tracks">
+    {{ track.name }} by
+    {{ track.artist.name }}
+    {{ track.artists[0].name }}
+  </li>
 </ul>
 
 <div class="big-loader-container row" ng-show="!playlist">

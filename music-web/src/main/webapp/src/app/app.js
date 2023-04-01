@@ -15,6 +15,15 @@ angular.module('music',
       // Configuring UI Router
       $uiViewScrollProvider.useAnchorScroll();
       $stateProvider
+          .state('register', {
+            url: '/register',
+            views: {
+              'page': {
+                templateUrl: 'partial/register.html',
+                controller: 'Register'
+              }
+            }
+          })
           .state('login', {
             url: '/login',
             views: {

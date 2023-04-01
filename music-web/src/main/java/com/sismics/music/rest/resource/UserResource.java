@@ -63,10 +63,11 @@ public class UserResource extends BaseResource {
         @FormParam("locale") String localeId,
         @FormParam("email") String email) {
 
-        if (!authenticate()) {
-            throw new ForbiddenClientException();
-        }
-        checkPrivilege(Privilege.ADMIN);
+        // if (!authenticate()) {
+        //     throw new ForbiddenClientException();
+        // }
+
+        // checkPrivilege(Privilege.ADMIN);
         
         // Validate the input data
         username = Validation.length(username, "username", 3, 50);

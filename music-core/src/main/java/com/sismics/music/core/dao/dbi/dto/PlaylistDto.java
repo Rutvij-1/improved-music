@@ -10,12 +10,12 @@ public class PlaylistDto {
      * Playlist ID.
      */
     private String id;
-    
+
     /**
      * Playlist name.
      */
     private String name;
-    
+
     /**
      * Owner user ID.
      */
@@ -30,6 +30,11 @@ public class PlaylistDto {
      * Number of plays in the playlist.
      */
     private Long userTrackPlayCount;
+
+    /**
+     * Determines whether the playlist is public or private.
+     */
+    private Boolean isPublic;
 
     public String getId() {
         return id;
@@ -69,5 +74,13 @@ public class PlaylistDto {
 
     public void setUserTrackPlayCount(Long userTrackPlayCount) {
         this.userTrackPlayCount = userTrackPlayCount;
+    }
+
+    public Boolean getStatus() {
+        return isPublic;
+    }
+
+    public void setStatus(Boolean isPublic) {
+        this.isPublic = isPublic;
     }
 }

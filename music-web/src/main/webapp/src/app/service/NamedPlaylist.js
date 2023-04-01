@@ -5,6 +5,7 @@
  */
 angular.module('music').factory('NamedPlaylist', function($rootScope, $modal, Restangular, toaster) {
   $rootScope.playlists = [];
+  $rootScope.publicPlaylists = [];
   var service = {};
 
   service = {
@@ -13,6 +14,11 @@ angular.module('music').factory('NamedPlaylist', function($rootScope, $modal, Re
         limit: 1000
       }).then(function(data) {
         $rootScope.playlists = data.items;
+      });
+      Restangular.one('playlist/public').get({
+        limit: 1000
+      }).then(function(data) {
+        $rootScope.publicPlaylists = data.items;
       });
     },
 

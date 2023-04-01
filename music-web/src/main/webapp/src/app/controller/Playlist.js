@@ -23,6 +23,13 @@ angular
           $scope.playlist = data;
         });
 
+
+      Restangular.one("user")
+        .get()
+        .then(function (data) {
+          $scope.user = data;
+        });
+
       $scope.recommendLastFM = function () {
         var tracks = new Array();
 
@@ -151,6 +158,31 @@ angular
         NamedPlaylist.remove($scope.playlist).then(function () {
           $state.go("main.default");
         });
+      };
+
+
+      // Make the playlist private
+      $scope.makePrivate = function () {
+        if ($scope.playlist.isPublic) {
+          Restangular.one("playlist/status", $stateParams.id)
+            .post()
+            .then(function (data) {
+              $scope.playlist = data;
+            });
+          window.location.reload();
+        }
+      };
+
+      // Make the playlist public
+      $scope.makePublic = function () {
+        if (!$scope.playlist.isPublic) {
+          Restangular.one("playlist/status", $stateParams.id)
+            .post()
+            .then(function (data) {
+              $scope.playlist = data;
+            });
+          window.location.reload();
+        }
       };
 
       // Update UI on track liked

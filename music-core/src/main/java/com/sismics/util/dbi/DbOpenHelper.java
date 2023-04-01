@@ -25,11 +25,11 @@ public abstract class DbOpenHelper {
     private static final Logger log = LoggerFactory.getLogger(DbOpenHelper.class);
 
     private final Handle handle;
-    
+
     private final List<Exception> exceptions = new ArrayList<>();
 
     private boolean haltOnError;
-    
+
     public DbOpenHelper(Handle handle) {
         this.handle = handle;
     }
@@ -43,7 +43,8 @@ public abstract class DbOpenHelper {
             // Check if database is already created
             Integer oldVersion = null;
             try {
-                List<Map<String,Object>> resultMap = handle.select("select c.value as ver from t_config c where c.id='DB_VERSION'");
+                List<Map<String, Object>> resultMap = handle
+                        .select("select c.value as ver from t_config c where c.id='DB_VERSION'");
                 if (!resultMap.isEmpty()) {
                     String oldVersionStr = (String) resultMap.get(0).get("ver");
                     oldVersion = Integer.parseInt(oldVersionStr);
@@ -62,11 +63,13 @@ public abstract class DbOpenHelper {
                 onCreate();
                 oldVersion = 0;
             }
-            
+
             // Execute update script
             ResourceBundle configBundle = ConfigUtil.getConfigBundle();
             Integer currentVersion = Integer.parseInt(configBundle.getString("db.version"));
-            log.info(MessageFormat.format("Found database version {0}, new version is {1}, executing database incremental update scripts", oldVersion, currentVersion));
+            log.info(MessageFormat.format(
+                    "Found database version {0}, new version is {1}, executing database incremental update scripts",
+                    oldVersion, currentVersion));
             onUpgrade(oldVersion, currentVersion);
             log.info("Database upgrade complete");
         } catch (Exception e) {
@@ -86,7 +89,7 @@ public abstract class DbOpenHelper {
             return name.matches("dbupdate-" + versionString + "-\\d+\\.sql");
         });
         Collections.sort(fileNameList);
-        
+
         for (String fileName : fileNameList) {
             if (log.isInfoEnabled()) {
                 log.info(MessageFormat.format("Executing script: {0}", fileName));
@@ -95,7 +98,7 @@ public abstract class DbOpenHelper {
             executeScript(is);
         }
     }
-    
+
     /**
      * Execute a SQL script.
      * 
@@ -108,8 +111,8 @@ public abstract class DbOpenHelper {
             if (Strings.isNullOrEmpty(sql) || sql.startsWith("--")) {
                 continue;
             }
-            
-//            String formatted = formatter.format(sql);
+
+            // String formatted = formatter.format(sql);
             try {
                 log.trace(sql);
                 handle.update(sql);
@@ -127,7 +130,7 @@ public abstract class DbOpenHelper {
     }
 
     public abstract void onCreate() throws Exception;
-    
+
     public abstract void onUpgrade(int oldVersion, int newVersion) throws Exception;
 
     /**
@@ -149,6 +152,7 @@ public abstract class DbOpenHelper {
      * @param format True to format
      */
     public void setFormat(boolean format) {
-//        this.formatter = (format ? FormatStyle.DDL : FormatStyle.NONE).getFormatter();
+        // this.formatter = (format ? FormatStyle.DDL :
+        // FormatStyle.NONE).getFormatter();
     }
 }

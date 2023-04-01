@@ -10,12 +10,12 @@ public class PlaylistCriteria {
      * Playlist ID.
      */
     private String id;
-    
+
     /**
      * Returns the default playlist.
      */
     private Boolean defaultPlaylist;
-    
+
     /**
      * Name (like).
      */
@@ -25,6 +25,11 @@ public class PlaylistCriteria {
      * User ID.
      */
     private String userId;
+
+    /**
+     * Public status.
+     */
+    private Boolean isPublic;
 
     public String getId() {
         return this.id;
@@ -59,6 +64,15 @@ public class PlaylistCriteria {
 
     public PlaylistCriteria setUserId(String userId) {
         this.userId = userId;
+        return this;
+    }
+
+    public Boolean getStatus() {
+        return isPublic;
+    }
+
+    public PlaylistCriteria setStatus(Boolean isPublic) {
+        this.isPublic = isPublic;
         return this;
     }
 }

@@ -8,7 +8,10 @@
       <button class="btn btn-link" ng-click="playAllTracks()"><span class="glyphicon glyphicon-play"></span> Play all</button>
       <button class="btn btn-link" ng-click="shuffleAllTracks()"><span class="glyphicon glyphicon-random"></span> Shuffle</button>
       <button class="btn btn-link" ng-click="addAllTracks()"><span class="glyphicon glyphicon-plus"></span> Add all</button>
-      <button class="btn btn-link" ng-click="remove()"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+
+      <button class="btn btn-link" ng-click="remove()" ng-if="playlist.userId === user.id"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+      <button class="btn btn-link" ng-click="makePrivate()" ng-if="playlist.isPublic" ng-if="playlist.userId === user.id"><span class="glyphicon glyphicon-eye-close"></span> Make Private</button>
+      <button class="btn btn-link" ng-click="makePublic()" ng-if="!playlist.isPublic" ng-if="playlist.userId === user.id"><span class="glyphicon glyphicon-eye-open"></span> Make Public</button>
       <button class="btn btn-link" ng-click="recommendSpotify()"><span class="glyphicon glyphicon-ok"></span> Recommend Spotify</button>
       <button class="btn btn-link" ng-click="recommendLastFM()"><span class="glyphicon glyphicon-ok"></span> Recomment LastFM</button>
     </div>
@@ -40,7 +43,7 @@
           <span class="glyphicon btn-pointer btn-like" title="{{ track.liked ? 'Loved' : '' }}" ng-click="toggleLikeTrack(track)"
             ng-class="{ 'glyphicon-heart': track.liked, 'glyphicon-heart-empty': !track.liked }"></span>
         </td>
-        <td><span class="remove glyphicon glyphicon-minus btn-pointer" ng-click="removeTrack($index)"></span></td>
+        <td><span class="remove glyphicon glyphicon-minus btn-pointer" ng-click="removeTrack($index)" ng-if="playlist.userId === user.id"></span></td>
       </tr>
       </tbody>
     </table>

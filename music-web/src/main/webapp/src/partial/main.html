@@ -48,8 +48,18 @@
           <span class="glyphicon glyphicon-search form-control-feedback"></span>
         </div>
       </li>
+      <li>
+        <h4>My Playlists</h4>
+      </li>
       <li ng-if="playlists.length == 0" class="text-center text-muted">No playlist</li>
       <li bindonce ng-repeat="playlist in playlists | filter: { name: playlistSearch }">
+        <a ng-href="#/playlist/{{ playlist.id }}" bo-text="playlist.name"></a>
+      </li>
+      <li>
+        <h4>All Public Playlists</h4>
+      </li>
+      <li ng-if="publicPlaylists.length == 0" class="text-center text-muted">No public playlists available</li>
+      <li bindonce ng-repeat="playlist in publicPlaylists | filter: { name: playlistSearch }">
         <a ng-href="#/playlist/{{ playlist.id }}" bo-text="playlist.name"></a>
       </li>
     </ul>

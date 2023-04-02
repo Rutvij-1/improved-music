@@ -22,6 +22,7 @@ public class PlaylistMapper implements ResultSetMapper<PlaylistDto> {
         dto.setPlaylistTrackCount(r.getLong("c1"));
         dto.setUserTrackPlayCount(r.getLong("c2"));
         dto.setStatus(r.getBoolean("isPublic"));
+        dto.setCollaboration(r.getBoolean("isCollaborative"));
         return dto;
     }
 }

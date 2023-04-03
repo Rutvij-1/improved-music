@@ -21,3 +21,8 @@ alter table
 	T_PLAYLIST
 add
 	ISPUBLIC NUMBER(1);
+
+alter table
+	T_PLAYLIST
+add
+	ISCOLLABORATIVE NUMBER(1);

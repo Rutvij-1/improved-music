@@ -31,6 +31,7 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
         StringBuilder sb = new StringBuilder("select p.id as id, p.name as c0,")
                 .append("  p.user_id as userId,")
                 .append("  p.ispublic as isPublic,")
+                .append("  p.iscollaborative as isCollaborative,")
                 .append("  count(pt.id) as c1,")
                 .append("  sum(utr.playcount) as c2")
                 .append("  from t_playlist p")
@@ -64,6 +65,13 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
                 criteriaList.add("p.isPublic = 0");
             }
         }
+        if (criteria.getCollaboration() != null) {
+            if (criteria.getCollaboration()) {
+                criteriaList.add("p.isCollaborative = 1");
+            } else {
+                criteriaList.add("p.isCollaborative = 0");
+            }
+        }
 
         return new QueryParam(sb.toString(), criteriaList, parameterMap, null, filterCriteria,
                 Lists.newArrayList("p.id"), new PlaylistMapper());
@@ -76,18 +84,15 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
      * @return Playlist ID
      */
     public String create(Playlist playlist) {
-        System.out.println("");
-        System.out.println(playlist.getUserId());
-        System.out.println("");
-
         final Handle handle = ThreadLocalContext.get().getHandle();
         handle.createStatement("insert into " +
-                " t_playlist(id, user_id, name, ispublic)" +
-                " values(:id, :userId, :name, :isPublic)")
+                " t_playlist(id, user_id, name, ispublic, iscollaborative)" +
+                " values(:id, :userId, :name, :isPublic, :isCollaborative)")
                 .bind("id", playlist.getId())
                 .bind("userId", playlist.getUserId())
                 .bind("name", playlist.getName())
                 .bind("isPublic", (playlist.getStatus()) ? 1 : 0)
+                .bind("isCollaborative", (playlist.getCollaboration()) ? 1 : 0)
                 .execute();
         return playlist.getId();
     }
@@ -102,9 +107,11 @@ public class PlaylistDao extends BaseDao<PlaylistDto, PlaylistCriteria> {
         handle.createStatement("update t_playlist" +
                 "  set name = :name" +
                 "  , ispublic = :isPublic" +
+                "  , iscollaborative = :isCollaborative" +
                 "  where id = :id")
                 .bind("name", playlist.getName())
                 .bind("isPublic", playlist.getStatus())
+                .bind("isCollaborative", playlist.getCollaboration())
                 .bind("id", playlist.getId())
                 .execute();
     }

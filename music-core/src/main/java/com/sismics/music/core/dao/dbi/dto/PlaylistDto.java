@@ -36,6 +36,11 @@ public class PlaylistDto {
      */
     private Boolean isPublic;
 
+    /**
+     * Determines whether the public playlist is collaborative or not.
+     */
+    private Boolean isCollaborative;
+
     public String getId() {
         return id;
     }
@@ -82,5 +87,13 @@ public class PlaylistDto {
 
     public void setStatus(Boolean isPublic) {
         this.isPublic = isPublic;
+    }
+
+    public Boolean getCollaboration() {
+        return isCollaborative;
+    }
+
+    public void setCollaboration(Boolean isCollaborative) {
+        this.isCollaborative = isCollaborative;
     }
 }

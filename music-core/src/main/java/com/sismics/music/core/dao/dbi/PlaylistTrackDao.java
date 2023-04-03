@@ -52,7 +52,8 @@ public class PlaylistTrackDao {
      */
     public Integer getPlaylistTrackNextOrder(String playlistId) {
         final Handle handle = ThreadLocalContext.get().getHandle();
-        Object number = handle.createQuery("select max(pt.number) from t_playlist_track pt where pt.playlist_id = :playlistId")
+        Object number = handle
+                .createQuery("select max(pt.number) from t_playlist_track pt where pt.playlist_id = :playlistId")
                 .bind("playlistId", playlistId)
                 .map(ObjectMapper.FIRST)
                 .first();
@@ -63,13 +64,14 @@ public class PlaylistTrackDao {
      * Insert a track at the given position.
      *
      * @param playlistId Playlist ID
-     * @param trackId ID of the track to insert
-     * @param number Position to insert
+     * @param trackId    ID of the track to insert
+     * @param number     Position to insert
      */
     public void insertPlaylistTrack(String playlistId, String trackId, Integer number) {
         // Reorder currrent tracks
         final Handle handle = ThreadLocalContext.get().getHandle();
-        handle.createStatement("update t_playlist_track pt set pt.number = pt.number + 1 where pt.playlist_id = :playlistId and pt.number >= :number")
+        handle.createStatement(
+                "update t_playlist_track pt set pt.number = pt.number + 1 where pt.playlist_id = :playlistId and pt.number >= :number")
                 .bind("playlistId", playlistId)
                 .bind("number", number)
                 .execute();
@@ -86,29 +88,34 @@ public class PlaylistTrackDao {
      * Remove a track from the given position.
      *
      * @param playlistId Playlist ID
-     * @param number Position to remove
-     * @return Removed track ID, or null if no track could be found ot the specified number
+     * @param number     Position to remove
+     * @return Removed track ID, or null if no track could be found ot the specified
+     *         number
      */
     public String removePlaylistTrack(String playlistId, Integer number) {
         // Get track at the specified number
         final Handle handle = ThreadLocalContext.get().getHandle();
-        String trackId = handle.createQuery("select pt.track_id from t_playlist_track pt where pt.playlist_id = :playlistId and pt.number = :number")
+        String trackId = handle.createQuery(
+                "select pt.track_id from t_playlist_track pt where pt.playlist_id = :playlistId and pt.number = :number")
                 .bind("playlistId", playlistId)
                 .bind("number", number)
                 .map(StringMapper.FIRST)
                 .first();
+
         if (trackId == null) {
             return null;
         }
 
         // Delete the track
-        handle.createStatement("delete from t_playlist_track pt where pt.playlist_id = :playlistId and pt.number = :number")
+        handle.createStatement(
+                "delete from t_playlist_track pt where pt.playlist_id = :playlistId and pt.number = :number")
                 .bind("playlistId", playlistId)
                 .bind("number", number)
                 .execute();
 
         // Reorder currrent tracks
-        handle.createStatement("update t_playlist_track pt set pt.number = pt.number - 1 where pt.playlist_id = :playlistId and pt.number > :number")
+        handle.createStatement(
+                "update t_playlist_track pt set pt.number = pt.number - 1 where pt.playlist_id = :playlistId and pt.number > :number")
                 .bind("playlistId", playlistId)
                 .bind("number", number)
                 .execute();

@@ -23,7 +23,6 @@ angular
           $scope.playlist = data;
         });
 
-
       Restangular.one("user")
         .get()
         .then(function (data) {
@@ -34,14 +33,19 @@ angular
         var tracks = new Array();
 
         for (var i = 0; i < $scope.playlist.tracks.length; i++) {
-          var site =
-            `https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=${String($scope.playlist.tracks[i].artist.name)}&track=${String($scope.playlist.tracks[i].title)}&limit=10&api_key=6e04e3362ef7be553491b6556935a61b&format=json`;
+          var site = `https://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=${String(
+            $scope.playlist.tracks[i].artist.name
+          )}&track=${String(
+            $scope.playlist.tracks[i].title
+          )}&limit=10&api_key=6e04e3362ef7be553491b6556935a61b&format=json`;
 
           console.log(site);
 
           $http.get(site).then(
             function (data) {
-              tracks = [...new Set([...tracks, ...(data.data.similartracks.track)])];
+              tracks = [
+                ...new Set([...tracks, ...data.data.similartracks.track]),
+              ];
             },
             function (error) {
               console.log(error);
@@ -49,10 +53,9 @@ angular
           );
         }
 
-        var sleep = new Promise(resolve => setTimeout(resolve, 1000));
-      
+        var sleep = new Promise((resolve) => setTimeout(resolve, 1000));
+
         sleep.then(() => {
-          
           $scope.tracks = tracks;
           console.log(tracks);
         });
@@ -64,19 +67,27 @@ angular
       // spotify_api_site = "https://api.spotify.com/v1/search?q=" + query + "&type=track&market=IN&limit=5";
       // lastfm_api_site = "https://ws.audioscrobbler.com/2.0/?method=track.search&track=" + query + "&api_key=6e04e3362ef7be553491b6556935a61b&format=json";
 
-
       $scope.recommendSpotify = function () {
         var tracks = new Array();
         var rsite = "https://api.spotify.com/v1/recommendations?seed_tracks=";
-        var num = $scope.playlist.tracks.length <= 5 ? $scope.playlist.tracks.length : 5;
-        var heads = {authorization: "Bearer BQA2KdteOfgDPUjXwRvgJ3lpZ-OR2zdQhIbBeTF3mTxqqqpLEzNvgl5qPIMgkDtjMcSO4j02kDR6KbF5aX2hlXt6ve1_CcpTzcYxvlV8Mjd8eGSzjB_GzNoWwMHR1X9jR_47gFQm2HTHwdHGUU5vTN8iadCocsx0fX8YxAh16Ht88Y5giYqv26lP4klVZCJrWXmHRhicQ_VbZ7i2zowal_UAgLFQN9w3XyDfFZs8vNoT_FDeq3ByqgIfUO3-b04-P6T7uGN5x7v4gSobeJns2XxqPoSeqiltbwXn9sfS1U31Hkm9SI9ojMOADBa1e9CdBSw7iaDiW9NDWC8CujDViFIZS5BHf9-vAAE1_CsQ81hqV24"}
+        var num =
+          $scope.playlist.tracks.length <= 5
+            ? $scope.playlist.tracks.length
+            : 5;
+        var heads = {
+          authorization:
+            "Bearer BQA2KdteOfgDPUjXwRvgJ3lpZ-OR2zdQhIbBeTF3mTxqqqpLEzNvgl5qPIMgkDtjMcSO4j02kDR6KbF5aX2hlXt6ve1_CcpTzcYxvlV8Mjd8eGSzjB_GzNoWwMHR1X9jR_47gFQm2HTHwdHGUU5vTN8iadCocsx0fX8YxAh16Ht88Y5giYqv26lP4klVZCJrWXmHRhicQ_VbZ7i2zowal_UAgLFQN9w3XyDfFZs8vNoT_FDeq3ByqgIfUO3-b04-P6T7uGN5x7v4gSobeJns2XxqPoSeqiltbwXn9sfS1U31Hkm9SI9ojMOADBa1e9CdBSw7iaDiW9NDWC8CujDViFIZS5BHf9-vAAE1_CsQ81hqV24",
+        };
 
         for (var i = 0; i < num; i++) {
-          var site = "https://api.spotify.com/v1/search?q=" + $scope.playlist.tracks[i].title + "&type=track&market=IN&limit=10";
-      
+          var site =
+            "https://api.spotify.com/v1/search?q=" +
+            $scope.playlist.tracks[i].title +
+            "&type=track&market=IN&limit=10";
+
           console.log(site);
 
-          $http.get(site, {headers: heads}).then(
+          $http.get(site, { headers: heads }).then(
             function (data) {
               console.log(data.data.tracks.items[0].id);
               tracks.push(String(data.data.tracks.items[0].id));
@@ -87,18 +98,18 @@ angular
           );
         }
 
-        console.log(tracks)
+        console.log(tracks);
 
-        var sleep = new Promise(resolve => setTimeout(resolve, 1000));
-      
+        var sleep = new Promise((resolve) => setTimeout(resolve, 1000));
+
         sleep.then(() => {
-          for(var i = 0; i < tracks.length; i++) {
+          for (var i = 0; i < tracks.length; i++) {
             rsite += tracks[i] + ",";
           }
-  
+
           console.log(rsite);
-  
-          $http.get(rsite, {headers: heads}).then(
+
+          $http.get(rsite, { headers: heads }).then(
             function (data) {
               $scope.tracks = data.data.tracks;
               console.log(data.data.tracks);
@@ -108,9 +119,6 @@ angular
             }
           );
         });
-
-        
-
       };
 
       // Play a single track
@@ -160,23 +168,20 @@ angular
         });
       };
 
-
-      // Make the playlist private
-      $scope.makePrivate = function () {
-        if ($scope.playlist.isPublic) {
-          Restangular.one("playlist/status", $stateParams.id)
-            .post()
-            .then(function (data) {
-              $scope.playlist = data;
-            });
-          window.location.reload();
-        }
+      // Toggle the playlist public/private status
+      $scope.toggleStatus = function () {
+        Restangular.one("playlist/status", $stateParams.id)
+          .post()
+          .then(function (data) {
+            $scope.playlist = data;
+          });
+        window.location.reload();
       };
 
-      // Make the playlist public
-      $scope.makePublic = function () {
-        if (!$scope.playlist.isPublic) {
-          Restangular.one("playlist/status", $stateParams.id)
+      // Toggle the public playlist collaboration status
+      $scope.toggleCollaboration = function () {
+        if ($scope.playlist.isPublic) {
+          Restangular.one("playlist/collaboration", $stateParams.id)
             .post()
             .then(function (data) {
               $scope.playlist = data;

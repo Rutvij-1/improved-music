@@ -56,10 +56,8 @@ public class PlaylistResource extends BaseResource {
         playlist.setUserId(principal.getId());
         playlist.setName(name);
         playlist.setStatus(false);
+        playlist.setCollaboration(false);
         Playlist.createPlaylist(playlist);
-
-        // System.out.println("RANDI COURSE");
-        // System.out.println((playlist.getStatus()) ? 1 : 0);
 
         // Output the playlist
         return renderJson(Json.createObjectBuilder()
@@ -67,6 +65,7 @@ public class PlaylistResource extends BaseResource {
                         .add("id", playlist.getId())
                         .add("name", playlist.getName())
                         .add("isPublic", playlist.getStatus())
+                        .add("isCollaborative", playlist.getCollaboration())
                         .add("trackCount", 0)
                         .add("userTrackPlayCount", 0)
                         .build()));
@@ -92,7 +91,6 @@ public class PlaylistResource extends BaseResource {
 
         // Get the playlist
         PlaylistDto playlistDto = new PlaylistDao().findFirstByCriteria(new PlaylistCriteria()
-                // .setUserId(principal.getId())
                 .setDefaultPlaylist(false)
                 .setId(playlistId));
         notFoundIfNull(playlistDto, "Playlist: " + playlistId);
@@ -101,6 +99,7 @@ public class PlaylistResource extends BaseResource {
         Playlist playlist = new Playlist(playlistDto.getId());
         playlist.setName(name);
         playlist.setStatus(playlistDto.getStatus());
+        playlist.setCollaboration(playlistDto.getCollaboration());
         Playlist.updatePlaylist(playlist);
 
         // Output the playlist
@@ -125,7 +124,7 @@ public class PlaylistResource extends BaseResource {
 
         // Get the playlist
         PlaylistDto playlistDto = new PlaylistDao().findFirstByCriteria(new PlaylistCriteria()
-                // .setUserId(principal.getId())
+                .setUserId(principal.getId())
                 .setId(playlistId));
         notFoundIfNull(playlistDto, "Playlist: " + playlistId);
 
@@ -133,9 +132,45 @@ public class PlaylistResource extends BaseResource {
         Playlist playlist = new Playlist(playlistDto.getId());
         playlist.setName(playlistDto.getName());
         playlist.setStatus(!playlistDto.getStatus());
+        playlist.setCollaboration(false);
         Playlist.updatePlaylist(playlist);
 
         playlistDto.setStatus(!playlistDto.getStatus());
+        playlistDto.setCollaboration(false);
+
+        return renderJson(buildPlaylistJson(playlistDto));
+    }
+
+    /**
+     * Toggle the collaborative status of a named public playlist.
+     *
+     * @return Response
+     */
+    @POST
+    @Path("collaboration/{id: [a-z0-9\\-]+}")
+    public Response togglePlaylistCollaboration(
+            @PathParam("id") String playlistId) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+        Validation.required(playlistId, "id");
+
+        // Get the playlist
+        PlaylistDto playlistDto = new PlaylistDao().findFirstByCriteria(new PlaylistCriteria()
+                .setUserId(principal.getId())
+                .setStatus(true)
+                .setId(playlistId));
+        notFoundIfNull(playlistDto, "Playlist: " + playlistId);
+
+        // Update the playlist
+        Playlist playlist = new Playlist(playlistDto.getId());
+        playlist.setName(playlistDto.getName());
+        playlist.setStatus(playlistDto.getStatus());
+        playlist.setCollaboration(!playlistDto.getCollaboration());
+        Playlist.updatePlaylist(playlist);
+
+        playlistDto.setCollaboration(!playlistDto.getCollaboration());
 
         return renderJson(buildPlaylistJson(playlistDto));
     }
@@ -261,9 +296,9 @@ public class PlaylistResource extends BaseResource {
     public Response loadPlaylist(
             @PathParam("id") String playlistId,
             @FormParam("clear") Boolean clear) {
-        // if (!authenticate()) {
-        // throw new ForbiddenClientException();
-        // }
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
 
         Validation.required(playlistId, "id");
 
@@ -453,7 +488,7 @@ public class PlaylistResource extends BaseResource {
         // Get the playlist
         PlaylistDto playlistDto = new PlaylistDao().findFirstByCriteria(new PlaylistCriteria()
                 .setDefaultPlaylist(false)
-                // .setUserId(principal.getId())
+                .setUserId(principal.getId())
                 .setId(playlistId));
         notFoundIfNull(playlistDto, "Playlist: " + playlistId);
 
@@ -496,6 +531,7 @@ public class PlaylistResource extends BaseResource {
                     .add("id", playlist.getId())
                     .add("name", playlist.getName())
                     .add("isPublic", playlist.getStatus())
+                    .add("isCollaborative", playlist.getCollaboration())
                     .add("trackCount", playlist.getPlaylistTrackCount())
                     .add("userTrackPlayCount", playlist.getUserTrackPlayCount()));
         }
@@ -528,8 +564,6 @@ public class PlaylistResource extends BaseResource {
         new PlaylistDao().findByCriteria(paginatedList, new PlaylistCriteria()
                 .setDefaultPlaylist(false)
                 .setStatus(true), sortCriteria, null);
-        // new PlaylistDao().findByCriteria(paginatedList, new PlaylistCriteria()
-        // .setDefaultPlaylist(false), sortCriteria, null);
 
         // Output the list
         JsonObjectBuilder response = Json.createObjectBuilder();
@@ -539,8 +573,55 @@ public class PlaylistResource extends BaseResource {
                     .add("id", playlist.getId())
                     .add("name", playlist.getName())
                     .add("isPublic", playlist.getStatus())
+                    .add("isCollaborative", playlist.getCollaboration())
                     .add("trackCount", playlist.getPlaylistTrackCount())
                     .add("userTrackPlayCount", playlist.getUserTrackPlayCount()));
+        }
+
+        response.add("total", paginatedList.getResultCount());
+        response.add("items", items);
+
+        return renderJson(response);
+    }
+
+    /**
+     * Returns all named public and collaborative playlists not belonging to the
+     * current user.
+     *
+     * @return Response
+     */
+    @GET
+    @Path("public/collaborative")
+    public Response listPublicCollaborativePlaylist(
+            @QueryParam("limit") Integer limit,
+            @QueryParam("offset") Integer offset,
+            @QueryParam("sort_column") Integer sortColumn,
+            @QueryParam("asc") Boolean asc) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+        // Get the playlists
+        PaginatedList<PlaylistDto> paginatedList = PaginatedLists.create(limit, offset);
+        SortCriteria sortCriteria = new SortCriteria(sortColumn, asc);
+        new PlaylistDao().findByCriteria(paginatedList, new PlaylistCriteria()
+                .setDefaultPlaylist(false)
+                .setStatus(true)
+                .setCollaboration(true), sortCriteria, null);
+
+        // Output the list
+        JsonObjectBuilder response = Json.createObjectBuilder();
+        JsonArrayBuilder items = Json.createArrayBuilder();
+        for (PlaylistDto playlist : paginatedList.getResultList()) {
+            if (!playlist.getUserId().equals(principal.getId())) {
+                items.add(Json.createObjectBuilder()
+                        .add("id", playlist.getId())
+                        .add("name", playlist.getName())
+                        .add("isPublic", playlist.getStatus())
+                        .add("isCollaborative", playlist.getCollaboration())
+                        .add("trackCount", playlist.getPlaylistTrackCount())
+                        .add("userTrackPlayCount", playlist.getUserTrackPlayCount()));
+            }
         }
 
         response.add("total", paginatedList.getResultCount());
@@ -653,6 +734,9 @@ public class PlaylistResource extends BaseResource {
         }
         if (playlist.getStatus() != null) {
             response.add("isPublic", playlist.getStatus());
+        }
+        if (playlist.getCollaboration() != null) {
+            response.add("isCollaborative", playlist.getCollaboration());
         }
         if (playlist.getUserId() != null) {
             response.add("userId", playlist.getUserId());

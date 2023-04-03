@@ -28,33 +28,26 @@ public class Playlist {
      */
     private String name;
 
+    /**
+     * Public/Private status of the playlist.
+     */
     private Boolean isPublic;
 
-    public Playlist() {
-    }
+    /**
+     * Collaborative status of the playlist.
+     */
+    private Boolean isCollaborative;
 
-    public Playlist(Boolean isPublic) {
-        this.isPublic = isPublic;
+    public Playlist() {
     }
 
     public Playlist(String id) {
         this.id = id;
     }
 
-    public Playlist(String id, Boolean isPublic) {
-        this.id = id;
-        this.isPublic = isPublic;
-    }
-
     public Playlist(String id, String userId) {
         this.id = id;
         this.userId = userId;
-    }
-
-    public Playlist(String id, String userId, Boolean isPublic) {
-        this.id = id;
-        this.userId = userId;
-        this.isPublic = isPublic;
     }
 
     /**
@@ -117,6 +110,24 @@ public class Playlist {
      */
     public void setStatus(Boolean isPublic) {
         this.isPublic = isPublic;
+    }
+
+    /**
+     * Getter of playlist collaborative status.
+     *
+     * @return isCollaborative
+     */
+    public Boolean getCollaboration() {
+        return isCollaborative;
+    }
+
+    /**
+     * Setter of playlist collaborative status.
+     *
+     * @param isCollaborative isCollaborative
+     */
+    public void setCollaboration(Boolean isCollaborative) {
+        this.isCollaborative = isCollaborative;
     }
 
     /**

@@ -31,6 +31,11 @@ public class PlaylistCriteria {
      */
     private Boolean isPublic;
 
+    /**
+     * If a public playlist is collaborative or not.
+     */
+    private Boolean isCollaborative;
+
     public String getId() {
         return this.id;
     }
@@ -73,6 +78,15 @@ public class PlaylistCriteria {
 
     public PlaylistCriteria setStatus(Boolean isPublic) {
         this.isPublic = isPublic;
+        return this;
+    }
+
+    public Boolean getCollaboration() {
+        return isCollaborative;
+    }
+
+    public PlaylistCriteria setCollaboration(Boolean isCollaborative) {
+        this.isCollaborative = isCollaborative;
         return this;
     }
 }

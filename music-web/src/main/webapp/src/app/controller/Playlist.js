@@ -156,7 +156,6 @@ angular
 
       // Remove a track
       $scope.removeTrack = function (order) {
-        console.log(order);
         NamedPlaylist.removeTrack($scope.playlist, order).then(function (data) {
           $scope.playlist = data;
         });

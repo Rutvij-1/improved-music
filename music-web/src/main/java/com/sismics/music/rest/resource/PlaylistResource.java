@@ -449,10 +449,6 @@ public class PlaylistResource extends BaseResource {
 
         Validation.required(order, "order");
 
-        System.out.println("");
-        System.out.println(playlistId);
-        System.out.println(order);
-
         // Get the playlist
         PlaylistCriteria criteria = new PlaylistCriteria().setId(playlistId);
         ;
@@ -464,8 +460,6 @@ public class PlaylistResource extends BaseResource {
         PlaylistDto playlist = new PlaylistDao().findFirstByCriteria(criteria);
         notFoundIfNull(playlist, "Playlist: " + playlistId);
 
-        System.out.println(playlist.getId());
-        System.out.println("");
         // Remove the track at the current order from playlist
         PlaylistTrackDao playlistTrackDao = new PlaylistTrackDao();
         String trackId = playlistTrackDao.removePlaylistTrack(playlist.getId(), order);

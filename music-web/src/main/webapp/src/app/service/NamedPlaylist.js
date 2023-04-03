@@ -57,8 +57,9 @@ angular
         },
 
         removeTrack: function (playlist, order) {
-          console.log(playlist.id, order);
-          return Restangular.one("playlist/" + playlist.id, order).remove();
+          return Restangular.one(
+            "playlist/" + playlist.id + "/" + order
+          ).remove();
         },
 
         remove: function (playlist) {
@@ -75,7 +76,7 @@ angular
         },
 
         moveTrack: function (playlist, order, neworder) {
-          return Restangular.one("playlist/" + playlist.id, order).post(
+          return Restangular.one("playlist/" + playlist.id + "/" + order).post(
             "move",
             {
               neworder: neworder,

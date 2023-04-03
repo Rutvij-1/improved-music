@@ -102,13 +102,9 @@ public class PlaylistTrackDao {
                 .map(StringMapper.FIRST)
                 .first();
 
-        System.out.println("");
-        System.out.println(trackId);
         if (trackId == null) {
             return null;
         }
-        System.out.println(trackId);
-        System.out.println("");
 
         // Delete the track
         handle.createStatement(
